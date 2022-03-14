@@ -27,6 +27,8 @@ class Lotto_Product
         add_filter('is_current', array($this, 'is_current'), 10, 1);
         add_action('add_product_meta', array($this, 'add_product_meta'), 10, 3);
         add_filter('cron_schedules', array($this, 'custom_interval'));
+        add_filter('is_product_exist', array($this, 'check_product_id'));
+        add_filter('get_icon', array($this, 'get_icon'));
 
     }
 
@@ -137,6 +139,36 @@ class Lotto_Product
         );
         return $schedules;
     }
+    public function get_image($hash)
+    {
+        global $wpdb;
+        $icon = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT *
+            FROM $wpdb->options
+            WHERE option_value = %s",
+                $hash
+            )
+        );
+
+        $icons = plugin_dir_url(__FILE__) . 'assets/icons/' . $icon->option_name;
+        return $icons;
+
+    }
+    public function check_product_id($product_id)
+    {
+        global $wpdb;
+        $products_table = $wpdb->prefix . "lotto_products";
+        $products = $wpdb->get_results("SELECT * FROM $products_table");
+        foreach ($products as $product) {
+            $ids[] = $product->product_id;
+        }
+        if (in_array($product_id, $ids)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 register_activation_hook(__FILE__, 'activation');
@@ -237,7 +269,6 @@ function update_all_products()
             do_action('add_product_meta', $product->product_id, "cutoff_time", $data->cutofftime);
             if (apply_filters('is_current', $api_key) == true) {
                 $is_current = 1;
-                error_log("one 1");
             }
             do_action('add_product_meta', $product->product_id, "is_current", $is_current);
 
