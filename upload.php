@@ -16,7 +16,7 @@ if (!empty($data["fileType"]) && !empty($data["fileUrl"])) {
     $fileUrl = $data["fileUrl"];
     $fileName = basename($fileUrl);
     $icons = [
-        ["icon" => $fileName],
+        ["productIcon" => $fileName],
 
     ];
 

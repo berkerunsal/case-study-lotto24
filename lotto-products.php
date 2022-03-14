@@ -28,8 +28,8 @@ class Lotto_Product
         add_action('add_product_meta', array($this, 'add_product_meta'), 10, 3);
         add_filter('cron_schedules', array($this, 'custom_interval'));
         add_filter('is_product_exist', array($this, 'check_product_id'));
-        add_filter('get_icon', array($this, 'get_icon'));
         add_filter('init_icon', array($this, 'init_icon'), 10, 1);
+        add_filter('get_image', array($this, 'get_image'));
 
     }
 
@@ -59,7 +59,7 @@ class Lotto_Product
         if (!empty($data)) {
 
             $sql = $wpdb->prepare("
-            INSERT INTO `$products_table` ( `product_id`, `api_key`, `display_name`, `icon_hash`)
+            INSERT INTO `$products_table` ( `product_id`, `api_key`, `display_name`, `productIcon`)
             VALUES ( %s, %s, %s, %s )",
                 $product["productId"], $api_key, $product["displayName"], $icon
             );
@@ -71,18 +71,22 @@ class Lotto_Product
 
     public function init_icon($product)
     {
-        $icon = $product["icon"];
+        $icon = $product["productIcon"];
 
         if (file_exists(plugin_dir_path(__FILE__) . 'assets/icons/' . $icon)) {
-            $file = $icon;
+            if (get_option($icon)) {
+                $hash = get_option($icon);
+            } else {
+                $hash = base64_encode(random_bytes(20));
+            }
+            if (get_option($icon) !== false) {
+                update_option($icon, $hash);
+            } else {
+                add_option($icon, $hash);
+            }
+
         } else {
-            $file = 'default.svg';
-        }
-        $hash = base64_encode(random_bytes(20));
-        if (get_option($file) !== false) {
-            update_option($file, $hash);
-        } else {
-            add_option($file, $hash);
+            $hash = get_option('default.svg');
         }
 
         return $hash;
@@ -118,20 +122,7 @@ class Lotto_Product
         $wpdb->query($sql);
 
     }
-    public function get_icon($hash)
-    {
-        global $wpdb;
-        $icon = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT *
-                FROM $wpdb->options
-                WHERE option_value = %s",
-                $hash
-            )
-        );
-        $icons = plugin_dir_url(__FILE__) . 'assets/icons/' . $icon->option_name;
-        return $icons;
-    }
+
     public function custom_interval($schedule)
     {
         $schedules['every_five_minutes'] = array(
@@ -143,17 +134,13 @@ class Lotto_Product
     public function get_image($hash)
     {
         global $wpdb;
-        $icon = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT *
-            FROM $wpdb->options
-            WHERE option_value = %s",
-                $hash
-            )
-        );
-
-        $icons = plugin_dir_url(__FILE__) . 'assets/icons/' . $icon->option_name;
-        return $icons;
+        $i = $wpdb->get_row($wpdb->prepare("SELECT * FROM $wpdb->options WHERE `option_value` = %s", $hash), OBJECT);
+        $icon = $i->option_name;
+        if ($icon) {
+            return $icon;
+        } else {
+            return "default.svg";
+        }
 
     }
     public function check_product_id($product_id)
@@ -205,10 +192,10 @@ function drop_tables()
 function init_products()
 {
     $initial_products = [
-        ["productId" => "lotto-6-aus-49", "apiKey" => "6aus49", "displayName" => "LOTTO 6 aus 49", "icon" => "lotto-6-aus-49.svg"],
-        ["productId" => "eurojackpot", "apiKey" => "eurojackpot", "displayName" => "EUROJACKPOT", "icon" => "eurojackpot.svg"],
-        ["productId" => "freiheitplus", "apiKey" => "freiheitplus", "displayName" => "Freiheit+", "icon" => "freiheitplus.svg"],
-        ["productId" => "traumhauslotterie", "apiKey" => "traumhauslotterie", "displayName" => "TRAUMHAUSLOTTERIE", "icon" => "traumhauslotterie.svg"],
+        ["productId" => "lotto-6-aus-49", "apiKey" => "6aus49", "displayName" => "LOTTO 6 aus 49", "productIcon" => "lotto-6-aus-49.svg"],
+        ["productId" => "eurojackpot", "apiKey" => "eurojackpot", "displayName" => "EUROJACKPOT", "productIcon" => "eurojackpot.svg"],
+        ["productId" => "freiheitplus", "apiKey" => "freiheitplus", "displayName" => "Freiheit+", "productIcon" => "freiheitplus.svg"],
+        ["productId" => "traumhauslotterie", "apiKey" => "traumhauslotterie", "displayName" => "TRAUMHAUSLOTTERIE", "productIcon" => "traumhauslotterie.svg"],
     ];
 
     foreach ($initial_products as $product) {
