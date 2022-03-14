@@ -29,6 +29,7 @@ class Lotto_Product
         add_filter('cron_schedules', array($this, 'custom_interval'));
         add_filter('is_product_exist', array($this, 'check_product_id'));
         add_filter('get_icon', array($this, 'get_icon'));
+        add_filter('init_icon', array($this, 'init_icon'), 10, 1);
 
     }
 
