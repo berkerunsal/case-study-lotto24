@@ -307,7 +307,7 @@ function create_products_table()
       product_id text NOT NULL,
       api_key text NOT NULL,
       display_name text NOT NULL,
-      icon_hash longtext,
+      productIcon longtext,
       PRIMARY KEY  (id)
     ) $charset_collate;";
 
