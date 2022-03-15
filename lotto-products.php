@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Lotto24 Products
  * Plugin URI: https://google.com
- * Description: Displays a list of Lotto24 Products.
+ * Description: Displays a list of Lotto24 Products. Use [display_products] shortocde to display products.
  * Version: 1.0
  * Author: Berker Unsal
  * Author URI: https://google.com
