@@ -6,19 +6,21 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 include_once 'lotto-products.php';
+/**
+ * Creating simple API for product icon upload from remote.
+ * As everyone can access this simple API, configuring a JWT token would make it secure
+ */
 
 $lotto_product = new Lotto_Product();
 
 $data = json_decode(file_get_contents("php://input"), 1);
 
+//Check if all required fields exist
 if (!empty($data["fileType"]) && !empty($data["fileUrl"])) {
     $fileType = $data["fileType"];
     $fileUrl = $data["fileUrl"];
     $fileName = basename($fileUrl);
-    $icons = [
-        ["productIcon" => $fileName],
-
-    ];
+    $icons = ["productIcon" => $fileName];
 
     if ($fileType != "productIcon") {
         echo json_encode(array("message" => "Unsupportded file type."));

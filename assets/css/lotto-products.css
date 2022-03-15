@@ -66,6 +66,7 @@
     line-height: 45px;
     margin-left: 16px;
     font-size: 18px;
+    font-weight: 400;
   }
   
   @media (max-width: 1226px) {

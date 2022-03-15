@@ -6,11 +6,16 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 include_once 'lotto-products.php';
+/**
+ * Creating simple API for product upload from remote.
+ * As everyone can access this simple API, configuring a JWT token would make it secure
+ */
 
 $lotto_product = new Lotto_Product();
 
 $data = json_decode(file_get_contents("php://input"), 1);
 
+//Check if all required fields exist
 if (!empty($data["productId"]) && !empty($data["displayName"]) && !empty($data["apiKey"])) {
     $product_id = $data["productId"];
 
@@ -18,6 +23,8 @@ if (!empty($data["productId"]) && !empty($data["displayName"]) && !empty($data["
         echo json_encode(array("message" => "Product with this productId already exists."));
 
     } else {
+
+        //Save icon if productIcon field exist
         if (!empty($data["productIcon"])) {
             if ($lotto_product->hash_exist($data["productIcon"])) {
 

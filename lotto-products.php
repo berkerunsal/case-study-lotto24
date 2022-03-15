@@ -22,7 +22,6 @@ class Lotto_Product
     {
 
         add_action('wp_enqueue_scripts', array($this, 'product_scripts'));
-        add_action('init_icon', array($this, 'init_icon'));
         add_action('save_product', array($this, 'save_product'));
         add_filter('is_current', array($this, 'is_current'), 10, 1);
         add_action('add_product_meta', array($this, 'add_product_meta'), 10, 3);
@@ -31,6 +30,7 @@ class Lotto_Product
         add_filter('init_icon', array($this, 'init_icon'), 10, 1);
         add_filter('get_image', array($this, 'get_image'));
 
+        //Rewrite rules for API endpoints
         add_action('init', function () {
             add_rewrite_endpoint('add_product.php', EP_PERMALINK);
             add_rewrite_endpoint('upload.php', EP_PERMALINK);
@@ -49,12 +49,14 @@ class Lotto_Product
         });
     }
 
+    //Call plugin css
     public function product_scripts()
     {
 
         wp_enqueue_style('lotto-products', plugin_dir_url(__FILE__) . 'assets/css/lotto-products.css');
     }
 
+    //Save products with activation or API call
     public function save_product($product)
     {
 
@@ -84,6 +86,8 @@ class Lotto_Product
         }
 
     }
+
+    //Check if icon hash received from upload API exists
     public function hash_exist($hash)
     {
         global $wpdb;
@@ -98,6 +102,9 @@ class Lotto_Product
         }
 
     }
+
+    //Assign hash for uploaded icons and save them to wp_options
+    //Return default icon's hash for non existent files
     public function init_icon($product)
     {
         $icon = $product["productIcon"];
@@ -120,6 +127,8 @@ class Lotto_Product
 
         return $hash;
     }
+
+    //Check from API if product is current
     public function is_current($api_key)
     {
 
@@ -152,14 +161,17 @@ class Lotto_Product
 
     }
 
+    //Custom interval for wp_schedule_event
     public function custom_interval($schedule)
     {
         $schedules['every_five_minutes'] = array(
-            'interval' => 30,
+            'interval' => 300,
             'display' => __('Every 5 Minutes', 'textdomain'),
         );
         return $schedules;
     }
+
+    //Get image file from hash
     public function get_image($hash)
     {
         global $wpdb;
@@ -172,6 +184,8 @@ class Lotto_Product
         }
 
     }
+
+    //Check if product exists in db
     public function check_product_id($product_id)
     {
         global $wpdb;
@@ -219,6 +233,8 @@ function drop_tables()
     $sql = "DROP TABLE IF EXISTS $products_table, $meta_table";
     $wpdb->query($sql);
 }
+
+//Set and save initial products
 function init_products()
 {
     $initial_products = [
@@ -236,6 +252,7 @@ function init_products()
 
 }
 
+//Get or update meta data of ACTIVE(current) product
 function update_current_products()
 {
     global $wpdb;
@@ -264,6 +281,7 @@ function update_current_products()
 
 }
 
+//Get or update meta data of ALL products
 function update_all_products()
 {
     global $wpdb;
@@ -349,6 +367,7 @@ function get_product_meta($product_id, $meta_key)
     }
 }
 
+//Check from db if product is current(active)
 function is_active($product_id)
 {
 
@@ -376,6 +395,8 @@ function currency_format($c)
     }
 
 }
+
+//Shortcode to display products
 function display_products()
 {
     global $wpdb;
