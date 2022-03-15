@@ -19,8 +19,15 @@ if (!empty($data["productId"]) && !empty($data["displayName"]) && !empty($data["
 
     } else {
         if (!empty($data["productIcon"])) {
-            $icon = $lotto_product->get_image($data["productIcon"]);
-            $data["productIcon"] = $icon;
+            if ($lotto_product->hash_exist($data["productIcon"])) {
+
+                $icon = $lotto_product->get_image($data["productIcon"]);
+                $data["productIcon"] = $icon;
+            } else {
+                http_response_code(503);
+                echo json_encode(array("message" => "The hash doesn't exist. Please provide a valid hash."));
+                exit;
+            }
 
         }
         $lotto_product->save_product($data);

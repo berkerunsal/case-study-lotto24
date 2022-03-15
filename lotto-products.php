@@ -30,7 +30,22 @@ class Lotto_Product
         add_filter('is_product_exist', array($this, 'check_product_id'));
         add_filter('init_icon', array($this, 'init_icon'), 10, 1);
         add_filter('get_image', array($this, 'get_image'));
+        add_action('init', function () {
+            add_rewrite_endpoint('add_product.php', EP_PERMALINK);
+            add_rewrite_endpoint('upload.php', EP_PERMALINK);
+        });
+        add_filter('init', function ($template) {
+            if (str_starts_with($_SERVER['REQUEST_URI'], "/add_product.php")) {
 
+                include plugin_dir_path(__FILE__) . 'add_product.php';
+                die;
+            }
+            if (str_starts_with($_SERVER['REQUEST_URI'], "/upload.php")) {
+
+                include plugin_dir_path(__FILE__) . 'upload.php';
+                die;
+            }
+        });
     }
 
     public function product_scripts()
@@ -68,7 +83,20 @@ class Lotto_Product
         }
 
     }
+    public function hash_exist($hash)
+    {
+        global $wpdb;
+        $option = $wpdb->get_row($wpdb->prepare("
+    SELECT * FROM $wpdb->options
+    WHERE `option_value` = %s",
+            $hash));
+        if ($option) {
+            return true;
+        } else {
+            return false;
+        }
 
+    }
     public function init_icon($product)
     {
         $icon = $product["productIcon"];
