@@ -1,0 +1,92 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 1.3em;
+    padding: 0 1em 2em;
+    line-height: 1.4;
+    text-align: center;
+  }
+  
+  
+  .container {
+    max-width: 1226px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .card {
+    width: calc((100% - 48px) / 3);
+    background: #eee;
+    padding: 8px;
+    margin: 8px;
+
+  }
+  .lotto-6-aus-49 {
+      background-color: rgb(255, 223, 0);
+  }
+  .traumhauslotterie {
+      background-color: rgb(53, 153, 186);
+  }
+  .eurojackpot {
+   background-color: rgb(245, 200, 0);
+  }
+  .freiheitplus {
+      background-color: rgb(250, 90, 90);
+  }
+   .top {
+    display: flex;
+  }
+  .content {
+    margin: 8px 0;
+    font-size: 20px;
+    line-height: 26px;
+    padding-left: 4px;
+    font-weight: 600;
+  }
+  .cutoff {
+    line-height: 22px!important;
+    margin-left: auto!important;
+    font-size: 18px!important;
+  }
+  img {
+    width: 45px;
+    min-width:45px;
+    height: auto;
+  }
+   
+  
+  .card h3 {
+    line-height: 45px;
+    margin-left: 16px;
+    font-size: 18px;
+  }
+  
+  @media (max-width: 1226px) {
+    
+    .card {
+       width: calc((100% - 32px) / 2);
+    }
+    .card h3, .cutoff, .content {
+        font-size: 18px;
+    }
+ 
+  }
+  
+  @media (max-width: 700px) {
+    .card {
+      width: 100%;
+      min-width: 345px;
+      min-height: 212px;
+    }
+     .content {
+        font-size: 24px;
+    }
+  
+  }

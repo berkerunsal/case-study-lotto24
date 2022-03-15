@@ -30,6 +30,7 @@ class Lotto_Product
         add_filter('is_product_exist', array($this, 'check_product_id'));
         add_filter('init_icon', array($this, 'init_icon'), 10, 1);
         add_filter('get_image', array($this, 'get_image'));
+
         add_action('init', function () {
             add_rewrite_endpoint('add_product.php', EP_PERMALINK);
             add_rewrite_endpoint('upload.php', EP_PERMALINK);
@@ -51,7 +52,7 @@ class Lotto_Product
     public function product_scripts()
     {
 
-        wp_enqueue_style('lotto-products', plugin_dir_url(__FILE__) . '/assets/css/lotto-products.css');
+        wp_enqueue_style('lotto-products', plugin_dir_url(__FILE__) . 'assets/css/lotto-products.css');
     }
 
     public function save_product($product)
@@ -185,6 +186,7 @@ class Lotto_Product
             return false;
         }
     }
+
 }
 
 register_activation_hook(__FILE__, 'activation');
@@ -333,5 +335,89 @@ function create_products_meta_table()
     dbDelta($sql);
 
 }
+function get_product_meta($product_id, $meta_key)
+{
+    global $wpdb;
+    $meta_table = $wpdb->prefix . "lotto_products_meta";
+    $meta = $wpdb->get_row($wpdb->prepare("
+        SELECT * FROM `$meta_table`
+        WHERE `product_id` = %s AND meta_key = %s",
+        $product_id, $meta_key));
+
+    if ($meta) {
+        return $meta->meta_value;
+    }
+}
+
+function is_active($product_id)
+{
+
+    if (get_product_meta($product_id, "is_current") == 1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+function jackpot_format($n)
+{
+    if ($n > 1000000) {
+
+        return round(($n / 1000000), 2) . ' MILLION';
+    } elseif ($n > 1000) {
+        return round(($n / 1000), 2) . ' THOUSANDS';
+    }
+
+    return number_format($n);
+}
+function currency_format($c)
+{
+    if ($c = "euro") {
+        return "€";
+    }
+
+}
+function display_products()
+{
+    global $wpdb;
+    $products_table = $wpdb->prefix . "lotto_products";
+    $products = $wpdb->get_results("SELECT * FROM $products_table");
+    echo '<div class="container">';
+    foreach ($products as $product) {
+
+        $product_id = $product->product_id;
+        $img_hash = $product->productIcon;
+        $img = apply_filters('get_image', $img_hash);
+        echo '<div class="card ' . $product_id . '">
+       <div class="top">
+       <img src="' . plugin_dir_url(__FILE__) . "assets/icons/" . $img . '">
+       <h3>' . $product->display_name . '</h3>
+       <h3 class="cutoff">';
+        if (!is_active($product_id)) {
+            echo 'Cut Off<br>';
+            $cutoff_stmp = get_product_meta($product_id, "cutoff_time");
+            $cutoff_date = strtotime($cutoff_stmp);
+            echo date("d/M/Y", $cutoff_date);
+
+        }
+
+        echo '</h3></div>
+       <div class="content">';
+        if (is_active($product_id)) {
+
+            $jackpot = get_product_meta($product_id, "jackpots");
+            $currency = get_product_meta($product_id, "currency");
+            echo "Current Jackpot: ";
+            echo jackpot_format($jackpot) . ' ' . currency_format($currency) . '<br>';
+        }
+        $draw_date_stmp = get_product_meta($product_id, "draw_date");
+        $draw_date = strtotime($draw_date_stmp);
+        echo "Draw Date: ";
+        echo date("d/M/Y", $draw_date);
+        echo '</div>
+     </div>';
+    }
+    echo '</div>';
+}
+add_shortcode('lotto_products', 'display_products');
 
 $lotto_product = new Lotto_Product();
